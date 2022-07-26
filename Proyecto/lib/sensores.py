@@ -19,17 +19,23 @@ class SensoresP(): #Clase
         
    
     def ActivarAlarma(self): #Metodo de la alarma
+        self.contador = 0
         print('alarma activa')
         Alarma=PWM(Pin(32))
         tono=[261, 277, 294, 311, 330, 349, 370, 392, 415, 440, 466, 494]
         while True:
-            for i in tono:
-                Alarma.freq(i)        
-                utime.sleep(0.15)               
+            self.contador+=1
+            if self.contador < 10:                
+                for i in tono:
+                    Alarma.freq(i)        
+                    utime.sleep(0.15)
+            else:
+                break
+        tono=[1]
+        for i in tono:
+            Alarma.freq(i)        
+            utime.sleep(0.15)        
 
-    
-    def ApagarAlarma(self): #Metodo para apagar la alarma
-        print('soy la alarma Apagada')
     
     def EncenderRGB(self,Est): #Metodo del led RGB
         self.Estado=Est
@@ -41,7 +47,7 @@ class SensoresP(): #Clase
             self.Colores(0,1,1);utime.sleep(2) #Color Magenta
             self.Colores(0,0,0);utime.sleep(2) #Apaga el led            
     
-    def conectaWifi(self,red, password):        
+    def conectaWifi(self,red, password): #Metodo para la conexion Wifi     
         miRed = network.WLAN(network.STA_IF)     
         if not miRed.isconnected():              #Si no está conectado…
             miRed.active(True)                   #activa la interface
@@ -53,7 +59,7 @@ class SensoresP(): #Clase
                   return False
             return True        
     
-    def EnviarMensaje(self,Mensaje):
+    def EnviarMensaje(self,Mensaje):  #Metodo que envia el mensaje a telegram
         self.Msm=Mensaje
         bot_token = '5492291306:AAFfFcDNzYPm9T0Xsf2cXGJkwxMCq2Ita_Y'
         bot_chatID = '1502901237'
