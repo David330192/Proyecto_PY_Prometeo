@@ -1,6 +1,5 @@
 from machine import UART
 import time, struct, btree
-
 class As608(object):
     def __init__(self,u1):
         self.data0= b'\xef\x01\xff\xff\xff\xff\01\x00\x03\x01\x00\x05'  #
@@ -9,12 +8,13 @@ class As608(object):
         self.search_data = b'\xef\x01\xff\xff\xff\xff\01\x00\x03\x11\x00\x15'  #
         self.del_one = b'\xef\x01\xff\xff\xff\xff\01\x00\x07\x0c'  #
         self.u1 = u1
+        self.Encontro = 0
 
     def del_numid(self,num):
         self.u1.read()
         data = self.del_one + struct.pack ('>h' ,num) + b'\x00\x01'
         data_list = struct.unpack('%db' %len(data[6:]),data[6:])
-        data =data+struct.pack('h',sum(data_list))
+        data =data+struct.pack('>h',sum(data_list))
         self.u1.write(data)
         time.sleep(1)
         rec =self.u1.read()
@@ -34,6 +34,7 @@ class As608(object):
         db.flush()
         db.close()
         f.close()
+        
     def read_btree(self,b_id):
         try:
             f = open("mydb", "r+b")
@@ -75,7 +76,7 @@ class As608(object):
         print(ok)
         if ok == 0:
             self.u1.read()
-            self.u1.write(self.login_data)
+            self.u1.write(self.loging_data)
             time.sleep(1)
             rec = self.u1.read()
             auth_code=rec[-5:-4]
@@ -104,15 +105,18 @@ class As608(object):
             score = rec[-4:-2]
             data_btree=self.read_btree(str(page_id))
             print(page_id,score,data_btree)
+            self.Encontro=1
             return [1,page_id,score,data_btree]
         else:
             print('No se encuentra el registro de la huella')
+            self.Encontro=0
             return 0
         
 if __name__=='__main__':
-    u1=UART(1,57600,tx=1,rx=3)
+    u1=UART(1,57600,tx=22,rx=23)
     a=As608(u1)    
     a.finger()    
     id=a.search()
-    #a.del_numid(1) #Elimina la huella, colocar el id de la huella
+    a.del_numid(1) #Elimina la huella, colocar el id de la huella
     a.login(name) #Registre nueva huella
+    a.clear_all()
